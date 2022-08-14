@@ -1,11 +1,10 @@
 package io.hjforever.grpc.local;
 
-
 import io.grpc.stub.StreamObserver;
 import io.hjforever.grpc.user.UserGrpc;
 import io.hjforever.grpc.user.UserReply;
 import io.hjforever.grpc.user.UserRequest;
-import net.devh.springboot.autoconfigure.grpc.server.GrpcService;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * user service
  */
-@GrpcService(UserGrpc.class)
+@GrpcService
 public class GrpcServerService extends UserGrpc.UserImplBase {
 
     Logger logger = LoggerFactory.getLogger(GrpcServerService.class);

@@ -7,7 +7,7 @@ import io.grpc.stub.StreamObserver;
 import io.hjforever.grpc.user.UserGrpc;
 import io.hjforever.grpc.user.UserReply;
 import io.hjforever.grpc.user.UserRequest;
-import net.devh.springboot.autoconfigure.grpc.client.GrpcClient;
+import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

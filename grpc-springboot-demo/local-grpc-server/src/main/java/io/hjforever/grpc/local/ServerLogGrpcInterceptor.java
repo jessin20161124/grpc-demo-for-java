@@ -1,6 +1,12 @@
 package io.hjforever.grpc.local;
 
-import io.grpc.*;
+import io.grpc.ForwardingServerCall;
+import io.grpc.ForwardingServerCallListener;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
+import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hjforever
  */
+@GrpcGlobalServerInterceptor
 public class ServerLogGrpcInterceptor implements ServerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerLogGrpcInterceptor.class);

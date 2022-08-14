@@ -1,0 +1,21 @@
+grpc:
+  client:
+    local-grpc-server:
+      address: static://127.0.0.1:9898
+      enableKeepAlive: true
+      keepAliveTime: 15s
+      keepAliveWithoutCalls: true
+      negotiationType: plainText
+      immediateConnectTimeout: 10s
+server:
+  port: 8080
+spring:
+  application:
+    name: local-grpc-client
+  mvc:
+    servlet:
+      loadOnStartup: 1
+logging:
+  level:
+    root: debug
+

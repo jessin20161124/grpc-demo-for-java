@@ -38,7 +38,7 @@ public class HelloWorldClient {
                  * 此处将设为文本连接 ， 只用于测试
                  *
                  */
-                .usePlaintext(true)
+                //.usePlaintext()
                 .build());
     }
 

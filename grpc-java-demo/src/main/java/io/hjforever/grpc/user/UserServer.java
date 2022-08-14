@@ -1,5 +1,6 @@
 package io.hjforever.grpc.user;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -9,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * user server
@@ -36,8 +38,12 @@ public class UserServer {
         int port = 50051;
         server = ServerBuilder.forPort(port)
                 .addService(new UserImpl())
-                .build()
-                .start();
+            // 允许客户端在没有调用时（没有header/data）发起心跳
+            .permitKeepAliveWithoutCalls(true)
+            // 允许客户端发起心跳间隔的最低时间
+            .permitKeepAliveTime(600, TimeUnit.SECONDS)
+            .build()
+            .start();
 
         logger.info("Server started, listening on " + port);
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -71,7 +77,16 @@ public class UserServer {
         @Override
         public void queryUserByIds(UserRequest userRequest, StreamObserver<UserReply> stream) {
             Long userId = userRequest.getUserId();
-            logger.info("query user by id : {}", userId);
+            Map<Integer, String> data = userRequest.getDataMap();
+            UserInfo userInfo;
+            try {
+                userInfo = userRequest.getObj().unpack(UserInfo.class);
+            } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+            }
+
+            logger.info("query user by id : {}, data:{}, userInfo is {}, struct is:{}",
+                userId, data, userInfo, userRequest.getSt().getFieldsMap());
             //模拟查询数据
             for (int i = 0; i < 10; i++) {
                 UserReply userReply = UserReply.newBuilder().setUserId(i + 1).setAge(i + 1).setName("测试" + i).build();
@@ -97,7 +112,13 @@ public class UserServer {
                             .setAge(18)
                             .setUserId(userRequest.getUserId())
                             .build();
+                    try {
+                        TimeUnit.SECONDS.sleep(3);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     streamObserver.onNext(userReply);
+
                 }
 
                 @Override
