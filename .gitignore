@@ -125,3 +125,8 @@ local.properties
 .scala_dependencies
 .worksheet
 
+grpc-java-demo/target
+grpc-springboot-demo/local-grpc-client/target
+grpc-springboot-demo/local-grpc-proto/target
+grpc-springboot-demo/local-grpc-server/target
+
