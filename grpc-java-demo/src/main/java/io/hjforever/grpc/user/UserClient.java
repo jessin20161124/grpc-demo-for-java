@@ -9,7 +9,6 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -49,15 +48,16 @@ public class UserClient {
             // 心跳间隔
             .keepAliveTime(15, TimeUnit.SECONDS)
             .keepAliveWithoutCalls(true)
-            // 消息体大小？？byte
-            .maxInboundMessageSize(1000)
+            // 消息体大小？？64MB
+            .maxInboundMessageSize(64 * 1024 * 1024)
             .intercept(new ClientLogGrpcInterceptor())
                 .build());
     }
 
-
     UserClient(ManagedChannel channel) {
+        // 可以有多个channel...
         this.channel = channel;
+        // todo 用时再构造
         blockingStub = UserGrpc.newBlockingStub(channel);
         asyncStub = UserGrpc.newStub(channel);
     }
@@ -94,11 +94,25 @@ public class UserClient {
             .build();
         //blockingStub.withDeadlineAfter()
         //blockingStub.withInterceptors();
-        Iterator<UserReply> users = blockingStub.queryUserByIds(userRequest);
-        for (int i = 0; users.hasNext(); i++) {
-            UserReply userReply = users.next();
-            logger.info("user id is : {} , user name is :{},user age is {}", userReply.getUserId(), userReply.getName(), userReply.getAge());
-        }
+        asyncStub.queryUserByIds(userRequest, new StreamObserver<UserReply>() {
+            @Override public void onNext(UserReply userReply) {
+                logger.info("queryUserByIds, reply: {}", userReply);
+            }
+
+            @Override public void onError(Throwable throwable) {
+                logger.error("queryUserByIds, error", throwable);
+
+            }
+
+            @Override public void onCompleted() {
+                logger.info("queryUserByIds, completed");
+            }
+        });
+//        Iterator<UserReply> users = blockingStub.queryUserByIds(userRequest);
+//        for (int i = 0; users.hasNext(); i++) {
+//            UserReply userReply = users.next();
+//            logger.info("user id is : {} , user name is :{},user age is {}", userReply.getUserId(), userReply.getName(), userReply.getAge());
+//        }
     }
 
     public void queryUserByName() throws InterruptedException {

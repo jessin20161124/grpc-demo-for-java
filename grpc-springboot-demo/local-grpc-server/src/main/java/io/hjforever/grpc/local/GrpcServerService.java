@@ -8,6 +8,8 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * user service
@@ -17,6 +19,7 @@ public class GrpcServerService extends UserGrpc.UserImplBase {
 
     Logger logger = LoggerFactory.getLogger(GrpcServerService.class);
 
+    Random random = new Random();
     @Override
     public void queryUserById(UserRequest userRequest, StreamObserver<UserReply> responseObserver) {
 
@@ -25,10 +28,15 @@ public class GrpcServerService extends UserGrpc.UserImplBase {
         Long userId = userRequest.getUserId();
 
         UserReply userReply = UserReply.newBuilder().setUserId(userId).setName("mike" + userId).setAge(18).build();
-
+        try {
+            TimeUnit.SECONDS.sleep(random.nextInt(8));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         responseObserver.onNext(userReply);
 
         responseObserver.onCompleted();
+        logger.info("请求参数为: {}，响应", userRequest);
 
     }
 

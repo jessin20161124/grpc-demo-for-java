@@ -40,8 +40,8 @@ public class UserServer {
                 .addService(new UserImpl())
             // 允许客户端在没有调用时（没有header/data）发起心跳
             .permitKeepAliveWithoutCalls(true)
-            // 允许客户端发起心跳间隔的最低时间
-            .permitKeepAliveTime(600, TimeUnit.SECONDS)
+            // 允许客户端发起心跳间隔的最低时间，也就是客户端至少是10s
+            .permitKeepAliveTime(10, TimeUnit.SECONDS)
             .build()
             .start();
 
@@ -91,6 +91,11 @@ public class UserServer {
             for (int i = 0; i < 10; i++) {
                 UserReply userReply = UserReply.newBuilder().setUserId(i + 1).setAge(i + 1).setName("测试" + i).build();
                 stream.onNext(userReply);
+                try {
+                    TimeUnit.SECONDS.sleep(3);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
             stream.onCompleted();
         }

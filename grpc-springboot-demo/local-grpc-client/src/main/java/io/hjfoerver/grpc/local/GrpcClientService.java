@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author hjforever
@@ -22,6 +23,9 @@ public class GrpcClientService {
 
     static final Metadata.Key<String> USERID_HEADER_KEY = Metadata.Key.of("user_id", Metadata.ASCII_STRING_MARSHALLER);
 
+    /**
+     * 线程安全
+     */
     @GrpcClient("local-grpc-server")
     private Channel serverChannel;
 
@@ -30,9 +34,11 @@ public class GrpcClientService {
         Metadata metadata = new Metadata();
         metadata.put(USERID_HEADER_KEY, "" + userId);
 
+        // todo 放这里不合适吧。。
         serverChannel = ClientInterceptors.intercept(serverChannel, new ClientHeaderGrpcInterceptor(metadata));
 
-        UserGrpc.UserBlockingStub stub = UserGrpc.newBlockingStub(serverChannel);
+        // 基于channel构建一个stub很廉价
+        UserGrpc.UserBlockingStub stub = UserGrpc.newBlockingStub(serverChannel).withDeadlineAfter(3, TimeUnit.SECONDS);
 
         UserRequest userRequest = UserRequest.newBuilder().setUserId(userId).build();
 
